@@ -1,24 +1,30 @@
-#include "KPlotWAV.h"
+#include "KFlowWAV.h"
 
-KPlotWAV::KPlotWAV():QOpenGLWidget(),pic(1, height) {
+KFlowWAV::KFlowWAV():QOpenGLWidget(){
 	setFixedHeight(height);
-	setMinimumWidth(1);
+	setFixedWidth(1600);
 
 //	setAutoFillBackground(false);
 	pen.setColor(QColor("blue"));
 	pen.setWidth(1);
 	pen.setJoinStyle(Qt::RoundJoin);
-	pic.fill(QColor("white"));
+
+	pen2.setColor(QColor("black"));
+	pen2.setWidth(1);
+	pen2.setJoinStyle(Qt::RoundJoin);
+
+	pic = QPixmap(1600, height);
+	pic.fill(QColor("gray"));
 
 	buf = new short[shift * 2];
 	memset(buf, 0, sizeof(short) * (shift * 2));
 }
 
-KPlotWAV::~KPlotWAV() {
+KFlowWAV::~KFlowWAV() {
 	delete[] buf;
 }
 
-void KPlotWAV::plot(short* data, int n_sample) {
+void KFlowWAV::plot(short* data, int n_sample) {
 	expand_buf(n_sample);
 	memcpy(&buf[idx], data, sizeof(short) * n_sample);
 
@@ -26,12 +32,15 @@ void KPlotWAV::plot(short* data, int n_sample) {
 	int point2display = total_sample / samples_in_point;
 
 	// Draw
-	tmp_pic = QPixmap(x + gap_btw_point*point2display, height);
+	tmp_pic = QPixmap(pic.width(), pic.height());
+	tmp_pic.fill(QColor("gray"));
+
 	painter.begin(&tmp_pic);
 	painter.setPen(pen);
-	painter.fillRect(0, 0, tmp_pic.width(), tmp_pic.height(), QColor("white"));
-	painter.drawPixmap(QPoint(0, 0), pic);
+	pen.setColor(QColor("blue"));
+	painter.drawPixmap(QPoint(-point2display*gap_btw_point, 0), pic);
 //	painter.setRenderHint(QPainter::Antialiasing);
+	x = pic.width() - point2display * gap_btw_point;
 	for (int i = 0; i < point2display; i++) {
 		short max = 0;
 		bool flag_pos = true;
@@ -56,12 +65,16 @@ void KPlotWAV::plot(short* data, int n_sample) {
 		painter.drawLine(x, y_prev, x + gap_btw_point, y);
 		x += gap_btw_point;
 
-
 		y_prev = y;
 	}
-  pic = tmp_pic;
   painter.end();
 
+	painter.begin(&tmp_pic);
+	painter.setPen(pen2);
+	painter.drawLine(0, 64, 1600, 64);
+  painter.end();
+
+  pic = tmp_pic;
 	// Shift buffer
 	for (int i = 0; i < 2 * shift - point2display * samples_in_point; i++) {
 		buf[i] = buf[i + point2display * samples_in_point];
@@ -69,17 +82,11 @@ void KPlotWAV::plot(short* data, int n_sample) {
 	idx -= point2display * samples_in_point;
 	total_sample -= point2display * samples_in_point;
 
-	this->resize(pic.width(), height);
-//	setMinimumWidth(pic.width());
-  //repaint();
-//	update();
-//	printf("resize : %d %d\n", pic.width(), pic.height());
-
-//	this->setFixedSize(pic.width(), height);
+	update();
 }
 
 
-void KPlotWAV::expand_buf(int shift_) {
+void KFlowWAV::expand_buf(int shift_) {
 	if (shift_ <= shift)
 		return;
 	short* t_buf = new short[shift_ * 2];
@@ -94,14 +101,14 @@ void KPlotWAV::expand_buf(int shift_) {
 }
 
 // ref : https://github.com/audacity/audacity/blob/7b0b15c123c6aa09a06356f7ed0decf429c68b02/src/tracks/playabletrack/wavetrack/ui/WaveformView.cpp
-void KPlotWAV::paintEvent(QPaintEvent* event) {
+void KFlowWAV::paintEvent(QPaintEvent* event) {
 	painter.begin(this);
 	painter.drawPixmap(0,0,pic.width(),pic.height(),pic);
 	painter.end();
 }
 
 
-void KPlotWAV::resizeEvent(QResizeEvent* e) {
+void KFlowWAV::resizeEvent(QResizeEvent* e) {
 	painter.begin(this);
 	painter.drawPixmap(0,0,pic.width(),pic.height(),pic);
 	painter.end();

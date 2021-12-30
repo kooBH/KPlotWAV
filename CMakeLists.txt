@@ -23,6 +23,8 @@ macro(display_elements
     endforeach()
 endmacro()
 
+include(${PROJECT_SOURCE_DIR}/lib/WAV/WAV.cmake)
+ 
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/tmp)
 
 ## MOC(Meta Object Compiler) of QtFramework
@@ -31,11 +33,15 @@ file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/tmp)
 	## sources to be processed by MOC
 	list(APPEND SRC_Qt_MOC
 	${PROJECT_SOURCE_DIR}/KPlotWAV.h
+	${PROJECT_SOURCE_DIR}/KFlowWAV.h
+	${PROJECT_SOURCE_DIR}/KWidgetPlotWAV.h
 	)	
 	
 	## sources without MetaObject 
 	list(APPEND SRC_Qt
 	${PROJECT_SOURCE_DIR}/KPlotWAV.cpp
+	${PROJECT_SOURCE_DIR}/KFlowWAV.cpp
+	${PROJECT_SOURCE_DIR}/KWidgetPlotWAV.cpp
 		)
 	
 	foreach(i  ${SRC_Qt_MOC})

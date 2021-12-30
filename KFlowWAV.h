@@ -5,12 +5,12 @@
 #include <QPainter>
 #include <QPaintEvent>
 
-class KPlotWAV : public QOpenGLWidget {
+class KFlowWAV : public QOpenGLWidget {
 	Q_OBJECT
 
 private:
 	int height = 128;
-	int gap_btw_point = 1;
+	int gap_btw_point = 2;
 	int samples_in_point = 100;
 	int shift = 128;
 	short* buf;
@@ -24,6 +24,7 @@ private:
 	int total_sample = 0;
 
   QPen pen;
+  QPen pen2;
 	QImage img;
 	QPixmap pic,tmp_pic;
 	QPainter painter;
@@ -31,8 +32,8 @@ private:
 	void expand_buf(int shift);
 
 public:
-	KPlotWAV();
-	~KPlotWAV();
+	KFlowWAV();
+	~KFlowWAV();
 
 
 	void paintEvent(QPaintEvent* event) override;
